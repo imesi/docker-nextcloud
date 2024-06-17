@@ -1,0 +1,124 @@
+services:
+  db:
+    image: mariadb:10.6
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    restart: always
+    volumes:
+      - db:/var/lib/mysql:Z
+    environment:
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_DISABLE_UPGRADE_BACKUP=1
+    env_file:
+      - db.env
+
+  redis:
+    image: redis:7.2-alpine
+    restart: always
+
+  app:
+    image: nextcloud:29-fpm-alpine
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html:z
+      - data:/var/www/data:z
+      - /root/nextcloud/ca.pem:/etc/ca.pem:ro
+    environment:
+      - MYSQL_HOST=db
+      - REDIS_HOST=redis
+      - NEXTCLOUD_DATA_DIR=/var/www/data
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.ime.usp.br
+      - NEXTCLOUD_ADMIN_USER=admin
+      - SMTP_HOST=smtp.ime.usp.br
+      - SMTP_SECURE=ssl
+      - SMTP_NAME=nextcloud
+      - SMTP_FROM_ADDRESS=no-reply
+      - PHP_UPLOAD_LIMIT=5G
+      - TRUSTED_PROXIES=172.29.0.2/16
+      - LDAPTLS_CACERT=/etc/ca.pem
+    env_file:
+      - db.env
+      - nextcloud.env
+    depends_on:
+      - db
+      - redis
+    dns:
+      - 200.144.254.26
+      - 143.107.45.11
+
+  web:
+    image: nginx:1.27-alpine
+    restart: always
+    volumes:
+      - /root/nextcloud/web/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nextcloud:/var/www/html:z,ro
+    environment:
+      - VIRTUAL_HOST=nextcloud.ime.usp.br
+      - LETSENCRYPT_HOST=nextcloud.ime.usp.br
+      - LETSENCRYPT_EMAIL=admin@ime.usp.br
+    depends_on:
+      - app
+    networks:
+      - proxy-tier
+      - default
+
+  cron:
+    image: nextcloud:29-fpm-alpine
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html:z
+      - data:/var/www/data:z
+    entrypoint: /cron.sh
+    environment:
+      - NEXTCLOUD_DATA_DIR=/var/www/data
+    depends_on:
+      - db
+      - redis
+
+  proxy:
+    image: nginxproxy/nginx-proxy:1.6.0-alpine
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    volumes:
+      - /root/nextcloud/proxy/uploadsize.conf:/etc/nginx/conf.d/uploadsize.conf:ro
+      - certs:/etc/nginx/certs:z,ro
+      - vhost.d:/etc/nginx/vhost.d:z
+      - html:/usr/share/nginx/html:z
+      - /var/run/docker.sock:/tmp/docker.sock:z,ro
+    networks:
+      - proxy-tier
+
+  letsencrypt-companion:
+    image: nginxproxy/acme-companion
+    restart: always
+    environment:
+      - DEFAULT_EMAIL=admin@ime.usp.br
+    volumes:
+      - certs:/etc/nginx/certs:z
+      - acme:/etc/acme.sh:z
+      - vhost.d:/etc/nginx/vhost.d:z
+      - html:/usr/share/nginx/html:z
+      - /var/run/docker.sock:/var/run/docker.sock:z,ro
+    networks:
+      - proxy-tier
+    depends_on:
+      - proxy
+
+volumes:
+  db:
+  data:
+  nextcloud:
+  certs:
+  acme:
+  vhost.d:
+  html:
+
+networks:
+  proxy-tier:
+  default:
+    ipam:
+      config:
+        - subnet: "172.29.0.2/16"
