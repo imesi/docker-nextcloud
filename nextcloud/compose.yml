@@ -21,13 +21,12 @@ services:
     volumes:
       - nextcloud:/var/www/html:z
       - data:/var/www/data:z
-      - /root/nextcloud/ca.pem:/etc/ca.pem:ro
+      - ./ca.pem:/etc/ca.pem:ro
     environment:
       - MYSQL_HOST=db
       - REDIS_HOST=redis
       - NEXTCLOUD_DATA_DIR=/var/www/data
       - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.ime.usp.br
-      - NEXTCLOUD_ADMIN_USER=admin
       - SMTP_HOST=smtp.ime.usp.br
       - SMTP_SECURE=ssl
       - SMTP_NAME=nextcloud
@@ -49,7 +48,7 @@ services:
     image: nginx:1.27-alpine
     restart: always
     volumes:
-      - /root/nextcloud/web/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web/nginx.conf:/etc/nginx/nginx.conf:ro
       - nextcloud:/var/www/html:z,ro
     environment:
       - VIRTUAL_HOST=nextcloud.ime.usp.br
@@ -83,7 +82,7 @@ services:
     labels:
       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     volumes:
-      - /root/nextcloud/proxy/uploadsize.conf:/etc/nginx/conf.d/uploadsize.conf:ro
+      - ./proxy/uploadsize.conf:/etc/nginx/conf.d/uploadsize.conf:ro
       - certs:/etc/nginx/certs:z,ro
       - vhost.d:/etc/nginx/vhost.d:z
       - html:/usr/share/nginx/html:z
@@ -107,6 +106,23 @@ services:
     depends_on:
       - proxy
 
+  backup:
+    restart: always
+    image: ghcr.io/borgmatic-collective/borgmatic
+    volumes:
+      - data:/mnt/nextcloud_data:ro
+      - db:/mnt/nextcloud_db:ro
+      - nextcloud:/mnt/nextcloud_nextcloud:ro
+      - /mnt/backup/borg:/mnt/borg-repository
+      #- /var/run/docker.sock:/tmp/docker.sock:z,ro
+      - ./backup/config.yaml:/etc/borgmatic.d/config.yaml
+      - ./backup/crontab.txt:/etc/borgmatic.d/crontab.txt
+    environment:
+      - BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+      - TZ='America/Sao_Paulo'
+    env_file:
+      - db.env
+
 volumes:
   db:
   data:
@@ -115,10 +131,10 @@ volumes:
   acme:
   vhost.d:
   html:
+  backup:
 
 networks:
   proxy-tier:
-  default:
     ipam:
       config:
-        - subnet: "172.29.0.2/16"
+        - subnet: "172.29.0.0/16"

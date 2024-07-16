@@ -1,0 +1,4 @@
+ca.pem
+db.env
+ldap.env
+nextcloud.env
