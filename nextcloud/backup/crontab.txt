@@ -1,0 +1,1 @@
+0 2 * * * PATH=$PATH:/usr/bin /usr/local/bin/borgmatic --stats -v 0 2>&1

@@ -1,0 +1,44 @@
+source_directories:
+  - /mnt/nextcloud_data
+  - /mnt/nextcloud_db
+  - /mnt/nextcloud_nextcloud
+
+repositories:
+  - path: /mnt/borg-repository
+    one_file_system: true
+
+compression: lz4
+archive_name_format: 'backup-{now}'
+
+keep_daily: 7
+
+checks:
+ - name: repository
+   frequency: 2 weeks
+ - name: archives
+   frequency: always
+ - name: extract
+   frequency: 1 month
+ - name: data
+   frequency: 1 month
+
+mariadb_databases:
+  - name: ${MYSQL_DATABASE}
+    hostname: db
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+
+before_backup:
+  - echo "Starting a backup job."
+after_backup:
+  - echo "Backup created."
+before_everything:
+  - echo "Enabling maintenance mode"
+  - echo "<?php \$CONFIG = array('maintenance' => true);" > /mnt/nextcloud_nextcloud/config/maintenance.config.php
+  - echo "Starting backups."
+after_everything:
+  - echo "Backups created."
+  - echo "Disabling maintenance mode"
+  - rm /mnt/nextcloud_nextcloud/config/maintenance.config.php
+on_error:
+  - echo "Error while creating a backup."
