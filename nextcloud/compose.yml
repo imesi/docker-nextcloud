@@ -24,6 +24,7 @@ services:
       - nextcloud:/var/www/html:z
       - data:/var/www/data:z
       - ${CA_FILE}:/etc/ca.pem:ro
+      - ./app-hooks/post-installation:/docker-entrypoint-hooks.d/post-installation
     environment:
       - MYSQL_HOST=db
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -34,6 +35,7 @@ services:
       - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_DOMAIN}
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+      - COLLABORA_DOMAIN=${COLLABORA_DOMAIN}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_SECURE=ssl
       - SMTP_NAME=${SMTP_NAME}
@@ -42,6 +44,11 @@ services:
       - PHP_UPLOAD_LIMIT=${PHP_UPLOAD_LIMIT}
       - TRUSTED_PROXIES=172.29.0.2/16
       - LDAPTLS_CACERT=/etc/ca.pem
+      - LDAP_BASE_DN=${LDAP_BASE_DN}
+      - LDAP_USER=${LDAP_USER}
+      - LDAP_PASSWORD=${LDAP_PASSWORD}
+      - LDAP_HOST=${LDAP_HOST}
+      - LDAP_LOGIN_GROUP=${LDAP_LOGIN_GROUP}
     depends_on:
       - db
       - redis
