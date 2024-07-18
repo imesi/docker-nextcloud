@@ -8,8 +8,10 @@ services:
     environment:
       - MARIADB_AUTO_UPGRADE=1
       - MARIADB_DISABLE_UPGRADE_BACKUP=1
-    env_file:
-      - db.env
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
   redis:
     image: redis:7.2-alpine
@@ -21,22 +23,25 @@ services:
     volumes:
       - nextcloud:/var/www/html:z
       - data:/var/www/data:z
-      - ./ca.pem:/etc/ca.pem:ro
+      - ${CA_FILE}:/etc/ca.pem:ro
     environment:
       - MYSQL_HOST=db
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - REDIS_HOST=redis
       - NEXTCLOUD_DATA_DIR=/var/www/data
-      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.ime.usp.br
-      - SMTP_HOST=smtp.ime.usp.br
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_DOMAIN}
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+      - SMTP_HOST=${SMTP_HOST}
       - SMTP_SECURE=ssl
-      - SMTP_NAME=nextcloud
-      - SMTP_FROM_ADDRESS=no-reply
-      - PHP_UPLOAD_LIMIT=5G
+      - SMTP_NAME=${SMTP_NAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_ADDRESS=${SMTP_FROM_ADDRESS}
+      - PHP_UPLOAD_LIMIT=${PHP_UPLOAD_LIMIT}
       - TRUSTED_PROXIES=172.29.0.2/16
       - LDAPTLS_CACERT=/etc/ca.pem
-    env_file:
-      - db.env
-      - nextcloud.env
     depends_on:
       - db
       - redis
@@ -48,9 +53,9 @@ services:
       - ./web/nginx.conf:/etc/nginx/nginx.conf:ro
       - nextcloud:/var/www/html:z,ro
     environment:
-      - VIRTUAL_HOST=nextcloud.ime.usp.br
-      - LETSENCRYPT_HOST=nextcloud.ime.usp.br
-      - LETSENCRYPT_EMAIL=admin@ime.usp.br
+      - VIRTUAL_HOST=${NEXTCLOUD_DOMAIN}
+      - LETSENCRYPT_HOST=${NEXTCLOUD_DOMAIN}
+      - LETSENCRYPT_EMAIL=${ADMIN_EMAIL}
     depends_on:
       - app
     networks:
@@ -97,7 +102,7 @@ services:
       - html:/usr/share/nginx/html:z
       - /var/run/docker.sock:/var/run/docker.sock:z,ro
     environment:
-      - DEFAULT_EMAIL=admin@ime.usp.br
+      - DEFAULT_EMAIL=${ADMIN_EMAIL}
     depends_on:
       - proxy
     networks:
@@ -111,17 +116,17 @@ services:
     cap_add:
       - MKNOD
     environment:
-      - VIRTUAL_HOST=office.ime.usp.br
-      - LETSENCRYPT_HOST=office.ime.usp.br
-      - LETSENCRYPT_EMAIL=admin@ime.usp.br
-      - aliasgroup1=https://nextcloud.ime.usp.br
-      - server_name=office.ime.usp.br
+      - VIRTUAL_HOST=${COLLABORA_DOMAIN}
+      - LETSENCRYPT_HOST=${COLLABORA_DOMAIN}
+      - LETSENCRYPT_EMAIL=${ADMIN_EMAIL}
+      - aliasgroup1=https://${NEXTCLOUD_DOMAIN}
+      - server_name=${COLLABORA_DOMAIN}
+      - username=${COLLABORA_ADMIN}
+      - password=${COLLABORA_ADMIN_PASSWORD}
       #- --o:security.seccomp=true
-      - extra_params=--o:ssl.enable=false --o:ssl.termination=true --o:mount_jail_tree=false --o:logging.level=warning --o:home_mode.enable=true --o:remote_font_config.url=https://nextcloud.ime.usp.br/apps/richdocuments/settings/fonts.json
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true --o:mount_jail_tree=false --o:logging.level=warning --o:home_mode.enable=true --o:remote_font_config.url=https://${NEXTCLOUD_DOMAIN}/apps/richdocuments/settings/fonts.json
       - TZ=America/Sao_Paulo
       - DONT_GEN_SSL_CERT=1
-    env_file:
-      - collabora.env
     networks:
       - proxy-tier
       - default
@@ -140,8 +145,8 @@ services:
     environment:
       - BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
       - TZ='America/Sao_Paulo'
-    env_file:
-      - db.env
+    #env_file:
+    #  - db.env
 
 volumes:
   db:
