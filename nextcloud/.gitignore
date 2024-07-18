@@ -1,4 +1,5 @@
 ca.pem
+collabora.env
 db.env
 ldap.env
 nextcloud.env

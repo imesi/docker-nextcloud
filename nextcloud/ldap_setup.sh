@@ -1,4 +1,4 @@
-#/bin/bash
+#! /bin/bash
 
 source ldap.env
 OCC='docker-compose exec --user www-data app php occ'
