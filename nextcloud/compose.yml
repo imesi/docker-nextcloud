@@ -40,9 +40,6 @@ services:
     depends_on:
       - db
       - redis
-    dns:
-      - 200.144.254.26
-      - 143.107.45.11
 
   web:
     image: nginx:1.27-alpine
