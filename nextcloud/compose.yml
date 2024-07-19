@@ -146,7 +146,7 @@ services:
     volumes:
       - data:/mnt/nextcloud_data:ro
       - db:/mnt/nextcloud_db:ro
-      - nextcloud:/mnt/nextcloud_nextcloud:ro
+      - nextcloud:/mnt/nextcloud_nextcloud:z
       - /mnt/backup/borg:/mnt/borg-repository
       #- /var/run/docker.sock:/tmp/docker.sock:z,ro
       - ./backup/config.yaml:/etc/borgmatic.d/config.yaml
@@ -154,8 +154,10 @@ services:
     environment:
       - BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
       - TZ='America/Sao_Paulo'
-    #env_file:
-    #  - db.env
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
 volumes:
   db:
