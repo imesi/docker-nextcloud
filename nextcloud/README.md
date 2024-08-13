@@ -50,3 +50,11 @@ onde o código é o ID obtido no passo anterior.
 Para definir um diretório específico com o conteúdo inicial:
 
     php occ config:system:set skeletondirectory --value="" --type=string
+
+##### Configurações de brute-force
+
+O nextcloud por padrão limita a quantidade de acessos que um mesmo ip pode realizar. Para liberar um IP em particular, é preciso primeiro habilitar o App _Brute-force settings_, seja pela interface Web ou via ``occ``:
+
+    php occ app:enable bruteforcesettings
+
+Após isso, será possível configurar a _Whitelist_ na página _Administration Settings_, _Seção Security_, item _Brute-force IP whitelist_.
