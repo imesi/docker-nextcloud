@@ -57,4 +57,7 @@ O nextcloud por padrão limita a quantidade de acessos que um mesmo ip pode real
 
     php occ app:enable bruteforcesettings
 
-Após isso, será possível configurar a _Whitelist_ na página _Administration Settings_, _Seção Security_, item _Brute-force IP whitelist_.
+Após isso, será possível configurar a _Whitelist_ na página _Administration Settings_, _Seção Security_, item _Brute-force IP whitelist_. Também é possível adicionar uma entrada via `occ`, por exemplo:
+
+    php occ config:app:set bruteForce whitelist_1 --value=143.107.44.127/0
+
