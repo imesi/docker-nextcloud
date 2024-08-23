@@ -25,6 +25,7 @@ services:
       - data:/var/www/data:z
       - ${CA_FILE}:/etc/ca.pem:ro
       - ./app-hooks/post-installation:/docker-entrypoint-hooks.d/post-installation
+      - ${GROUPFOLDERS_VOLUME}:/var/www/data/__groupfolders:z
     environment:
       - MYSQL_HOST=db
       - MYSQL_DATABASE=${MYSQL_DATABASE}
