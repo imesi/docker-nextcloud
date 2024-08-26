@@ -154,6 +154,7 @@ services:
       - ./backup/crontab.txt:/etc/borgmatic.d/crontab.txt
     environment:
       - BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+      - BORG_PASSPHRASE=${BORG_PASSPHRASE}
       - TZ='America/Sao_Paulo'
       - MYSQL_HOST=db
       - MYSQL_DATABASE=${MYSQL_DATABASE}
