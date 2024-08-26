@@ -71,3 +71,26 @@ Após isso, será possível configurar a _Whitelist_ na página _Administration 
 A vantagem da abordagem do _External Storage_ é que o mecanismo já é pensado para o conceito de um armazenamento que pode ser modificado externamente. Já a abordagem do _Group Folders_ é mais integrada com o _Nextcloud_, dado que o diretório é tratado como parte do armazenamento interno do _Nextcloud_, o que permite por exemplo definir cotas de espaço em disco por pasta de grupo (por mais que a mensagem de erro por ultrapassar a cota na interface web não seja clara). 
 
 Os detalhes do procedimento para montar o GCS via Rclone estão em uma [página dedicada](rclone.md).
+
+##### Borg Backup
+
+O compose inclui um container do _Borg Backup_ que roda periodicamente conforme o arquivo `./backup/crontab.txt` e joga os arquivos em um bind mount que aponta para `/mnt/backukp/borg`. O diretório precisa existir e ter um repositório inicializado para que os backups funcionem. Para inicializar um repositório sem criptografia:
+
+```
+docker-compose exec backup borgmatic rcreate -e none
+/mnt/borg-repository is not a valid repository. Check repo config.
+```
+
+Essa mensagem de saída é normal quando o destino é um diretório vazio ainda não incializado. Para rodar um backup de teste manualmente:
+
+```
+docker-compose exec backup borgmatic
+```
+
+Listando os backups:
+
+```
+docker-compose exec backup borgmatic list
+```
+
+Outras opções podem ser definidas no `.backup/config.yaml`. Para uso de criptografia é possível definir a passphrase usando a variável `BORG_PASSPHRASE`.
