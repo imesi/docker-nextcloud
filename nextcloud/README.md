@@ -27,6 +27,8 @@ Depois dos passos acima, ir para o diretório do Nextcloud e rodar:
 
 Numa instalação debian, ele está em /var/lib/samba/private/tls/ca.pem.
 
+OBS: o DNS do Samba deve ser acessível pela máquina onde roda o Nextcloud.
+
 ### Rotinas de administração
 
 A configuração extra pode ser realizada tanto por meio da interface administrativa quanto do utilitário occ. Para rodar o occ:
@@ -44,6 +46,15 @@ Para limpar a configuração de um usuário:
     php occ ldap:reset-user "E8A6F578-1B02-48D2-8BFF-8413F94AB15A"
 
 onde o código é o ID obtido no passo anterior.
+
+Há, ainda, algumas configurações portencialmente relevantes com os seguintes atributos autoexplicáveis:
+
+```
+"s01ldap_group_filter": "(objectclass=group)",
+"s01ldap_group_member_assoc_attribute": "member",
+"s01ldap_quota_attr": "",
+"s01ldap_quota_def": "10 MB",
+```
 
 ##### Skel
 
@@ -63,34 +74,16 @@ Após isso, será possível configurar a _Whitelist_ na página _Administration 
 
 ##### Trabalhando com Google Cloud Storage via Rclone
 
-É possível montar o *Google Cloud Storage* (*GCS*) através do *Rclone* no host, e então fazer um bind mount para repassar o diretório (ou um subdiretório) do *GCS* para dentro do container do nextcloud. Isso permite duas abordagens para tratar as pastas de grupo:
+É possível montar o *Google Cloud Storage* (*GCS*) via *Rclone* no host e fazer um bind mount para repassar um diretório do *GCS* para dentro do container do Nextcloud. Isso permite duas abordagens para tratar as pastas de grupo:
 
-  - Fazer um bind mount em um lugar arbitrário (como `/mnt/gcs`) e usar o mecanismo de _External Storage_ do _Nextcloud_ para compartilhar diretórios dentro desse mount com os usuários.
-  - Usar o Plug-in de _Group Folders_ e fazer bind mount do diretório `/var/www/data/__groupfolders` para um diretório dentro do mount do GCS.
+  - external storage: fazer um bind mount do GCS num lugar arbitrário (como `/mnt/gcs`) e compartilhar diretórios dentro desse mount com os usuários;
+  - group folders (pasta de grupo): fazer bind mount do GCS no diretório `/var/www/data/__groupfolders`.
 
-A vantagem da abordagem do _External Storage_ é que o mecanismo já é pensado para o conceito de um armazenamento que pode ser modificado externamente. Já a abordagem do _Group Folders_ é mais integrada com o _Nextcloud_, dado que o diretório é tratado como parte do armazenamento interno do _Nextcloud_, o que permite por exemplo definir cotas de espaço em disco por pasta de grupo (por mais que a mensagem de erro por ultrapassar a cota na interface web não seja clara). 
+A vantagem da abordagem do _External Storage_ é que o mecanismo já é pensado para o conceito de um armazenamento que pode ser modificado externamente. Já a abordagem do _Group Folders_ é mais integrada com o _Nextcloud_, dado que o diretório é tratado como parte do armazenamento interno do _Nextcloud_, o que permite por exemplo definir quotas de armazenamento por pasta de grupo.
+
+OBS: a mensagem de erro por ultrapassar a quota na interface web diz "erro desconhecido".
 
 Os detalhes do procedimento para montar o GCS via Rclone estão em uma [página dedicada](rclone.md).
 
-##### Borg Backup
-
-O compose inclui um container do _Borg Backup_ que roda periodicamente conforme o arquivo `./backup/crontab.txt` e joga os arquivos em um bind mount que aponta para `/mnt/backukp/borg`. O diretório precisa existir e ter um repositório inicializado para que os backups funcionem. Para inicializar um repositório sem criptografia:
-
-```
-docker-compose exec backup borgmatic rcreate -e none
-/mnt/borg-repository is not a valid repository. Check repo config.
-```
-
-Essa mensagem de saída é normal quando o destino é um diretório vazio ainda não incializado. Para rodar um backup de teste manualmente:
-
-```
-docker-compose exec backup borgmatic
-```
-
-Listando os backups:
-
-```
-docker-compose exec backup borgmatic list
-```
-
-Outras opções podem ser definidas no `.backup/config.yaml`. Para uso de criptografia é possível definir a passphrase usando a variável `BORG_PASSPHRASE`.
+##### Backup
+As instruções para operar o mecanismo de backup encontram-se na [página sobre backup](borg.md).

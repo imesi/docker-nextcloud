@@ -2,6 +2,7 @@ source_directories:
   - /mnt/nextcloud_data
   - /mnt/nextcloud_db
   - /mnt/nextcloud_nextcloud
+  - /mnt/nextcloud_groupfolders
 
 repositories:
   - path: /mnt/borg-repository

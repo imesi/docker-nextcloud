@@ -25,7 +25,7 @@ services:
       - data:/var/www/data:z
       - ${CA_FILE}:/etc/ca.pem:ro
       - ./app-hooks/post-installation:/docker-entrypoint-hooks.d/post-installation
-      - ${GROUPFOLDERS_VOLUME}:/var/www/data/__groupfolders:z
+      - ${GROUPFOLDERS_PATH}:/var/www/data/__groupfolders:z
     environment:
       - MYSQL_HOST=db
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -148,8 +148,8 @@ services:
       - data:/mnt/nextcloud_data:ro
       - db:/mnt/nextcloud_db:ro
       - nextcloud:/mnt/nextcloud_nextcloud:z
-      - /mnt/backup/borg:/mnt/borg-repository
-      #- /var/run/docker.sock:/tmp/docker.sock:z,ro
+      - ${GROUPFOLDERS_PATH}:/mnt/nextcloud_groupfolders:ro
+      - ${BORG_PATH}:/mnt/borg-repository
       - ./backup/config.yaml:/etc/borgmatic.d/config.yaml
       - ./backup/crontab.txt:/etc/borgmatic.d/crontab.txt
     environment:
@@ -160,6 +160,27 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  restore:
+    image: ghcr.io/borgmatic-collective/borgmatic
+    restart: always
+    volumes:
+      - ${BORG_PATH}:/mnt/borg-repository
+      - ./backup/config.yaml:/etc/borgmatic.d/config.yaml
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    devices:
+      - /dev/fuse
+    environment:
+      - BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+      - BORG_PASSPHRASE=${BORG_PASSPHRASE}
+      - TZ='America/Sao_Paulo'
+      - MYSQL_HOST=dummy
+      - MYSQL_DATABASE=dummy
+      - MYSQL_USER=dummy
+      - MYSQL_PASSWORD=dummy
 
 volumes:
   db:

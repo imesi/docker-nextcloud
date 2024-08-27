@@ -83,4 +83,3 @@ systemctl daemon-reload
 mkdir /mnt/gcs
 mount /mnt/gcs
 ```
-
