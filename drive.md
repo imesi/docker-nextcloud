@@ -31,7 +31,7 @@ docker-compose exec -u 82 app php occ groupfolders:quota id_do_groupfolder quota
 
 ### Trazendo os dados do drive de grupo
 
-Também utilizamos o Rclone para trazer os dados dos drives de grupo para um storage local. A ideia é configurar o Rclone para acessar o drive, mas **sem montar**, e fazer a cópia via `rclone sync`.
+Também utilizamos o Rclone para trazer os dados dos drives de grupo para um storage local. A ideia é configurar o Rclone para acessar o drive, mas **sem montar**, e fazer a cópia via `rclone copy`.
 
 ```bash
 # i é um acesso pré-configurado a um drive
@@ -39,5 +39,6 @@ rclone dedupe --dedupe-mode rename $i-drive:
 rclone copy --create-empty-src-dirs --drive-acknowledge-abuse $i-drive: /backup/drive/$i
 rclone check --one-way --missing-on-dst /root/ARQUIVOS-NAO-COPIADOS-$i $i-drive: /backup/drive/$i
 ```
+Há um porém: os arquivos do Google Docs, sem formato, serão exportados em formato de Office. Os formulários não serão salvos.
 
 ### Migrando dados locais para o Nextcloud
