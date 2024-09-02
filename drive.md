@@ -42,3 +42,13 @@ rclone check --one-way --missing-on-dst /root/ARQUIVOS-NAO-COPIADOS-$i $i-drive:
 Há um porém: os arquivos do Google Docs, sem formato, serão exportados em formato de Office. Os formulários não serão salvos.
 
 ### Migrando dados locais para o Nextcloud
+
+O Nextcloud não reconhece automaticamente qualquer conteúdo que seja colocado por fora dele. Daí é necessário um procedimento de scan para levar o novo conteúdo para registrar o conteúdo copiado por fora no Nextcloud, criando os metadadados necessários.
+
+Para copiar "manualmente" algum arquivo para o Nextcloud, basta:
+  - copiá-lo para o diretório correto referente ao groupfolder;
+  - rodar `docker-compose exec -u 82 app php occ groupfolders:scan --all`.
+
+É possível fornecer direto o ID de um groupfolder, que é um número inteiro. Basta trocar o `--all` pelo ID.
+
+IMPORTANTE: é **necessário** criar o groupfolder **antes** de copiar os arquivos.
