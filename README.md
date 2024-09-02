@@ -12,22 +12,26 @@ Docker compose completo para rodar Nextcloud com:
 
 Assumindo uma máquina Debian com IP externo:
 
-  - apt install docker.io docker-compose git;
-  - git clone [https://github.com/imesi/docker](https://github.com/imesi.docker);
-  - ajustar o arquivo .env no diretório docker/nextcloud;
+  - `apt install docker.io docker-compose git`;
+  - git clone [https://github.com/imesi/docker-nextcloud](https://github.com/imesi.docker);
+  - ajustar o arquivo .env;
   - obter o certificado CA do Samba;
   - liberar portas 80 e 443 no firewall para a máquina Debian;
   - adicionar no DNS um nome para o serviço do Nextcloud e outro para o serviço do Collabora.
 
 Depois dos passos acima, ir para o diretório do Nextcloud e rodar:
 
-    docker-compose up
+    docker-compose up -d
 
 ### Como obter o certificado CA no Samba?
 
 Numa instalação debian, ele está em /var/lib/samba/private/tls/ca.pem.
 
-OBS: o DNS do Samba deve ser acessível pela máquina onde roda o Nextcloud.
+OBS: o DNS do Samba deve ser acessível pela máquina onde roda o Nextcloud. Em particular, o nome contido no CN do certificado deve ser acessível via rede.
+
+Podemos obter o CN com o comando:
+
+    openssl x509 -noout -text -in ca.pem
 
 ### Rotinas de administração
 

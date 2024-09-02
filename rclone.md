@@ -2,19 +2,15 @@
 
 ## Instalação
 
-No debian, instalamos os pacotes `rclone` e `fuse3`. O fuse é necessário para a função `mount` mas não conta como dependência pois o rclone possui outros modos de operação.
+    apt install rclone fuse3
 
-```
-apt install rclone fuse3
-```
+O FUSE é necessário para a função `mount`.
 
 ## Configuração
 
 Para configurar, execute:
 
-```
-rclone config
-```
+    rclone config
 
 E escolha a opção `n) New remote`. As configurações que fogem do padrão são:
 
@@ -30,13 +26,11 @@ Caso esteja em uma máquina remota, lembre-se de responder `No` na pergunta `Use
 
 Assumindo o endereço do GCS:
 
-https://console.cloud.google.com/storage/browser/usp-gcp-0000073-31415.usp.br
+    https://console.cloud.google.com/storage/browser/usp-gcp-0000073-31415.usp.br
 
 A informação relevante é:
 
-```
-usp-gcp-0000073-31415.usp.br
-```
+    usp-gcp-0000073-31415.usp.br
 
 Um exemplo de linha para montar o armazenamento que usamos em nossos testes:
 
@@ -61,7 +55,6 @@ Detalhando as opções:
   - `--vfs-cache-max-age 168h`: Tempo máximo em que um arquivo fica no cache desde a última leitura.
   - `--vfs-cache-max-size 15G`: Tamanho máximo de objetos no cache. A documentação ressalta que o tamanho pode ser excedido por arquivos abertos (que nunca saem do cache) e que o tamanho só é verificado a cada `--vfs-cache-poll-interval`, que por padrão é 1 minuto.
 
-
 ## Montando automaticamente
 
 É possível fazer o mount via fstab. Primeiro é necessário fazer um symlink do rclone em `/sbin/` com prefixo `mount.`:
@@ -76,7 +69,7 @@ Colocando parâmetros similares ao mount acima (excetuando o logfile):
     nome-para-seu-compartilhamento:usp-gcp-0000073-31415.usp.br /mnt/gcs rclone allow_other,uid=82,gid=82,dir-perms=755,file-perms=644,use-server-modtime,transfers=16,vfs-cache-mode=full,vfs-fast-fingerprint,vfs-read-chunk-size=8M,vfs-read-chunk-size-limit=off,vfs-read-ahead=256M,vfs-cache-max-age=168h,vfs-cache-max-size=15G,config=/root/.config/rclone/rclone.conf 0 0
 ```
 
-Nessa linha, a pricipal diferença do exemplo manual é a necessidade de especificar o caminho da configuração do rclone com o parâmetro config. Uma vez especificado o mount point, basta recarregar o fstab, criar o destino do mount e montar:
+OBS: é necessário especificar o caminho da configuração do rclone com o parâmetro config. Uma vez especificado o mount point, basta recarregar o fstab, criar o destino do mount e montar:
 
 ```
 systemctl daemon-reload
