@@ -148,7 +148,6 @@ services:
       - data:/mnt/nextcloud_data:ro
       - db:/mnt/nextcloud_db:ro
       - nextcloud:/mnt/nextcloud_nextcloud:z
-      - ${GROUPFOLDERS_PATH}:/mnt/nextcloud_groupfolders:ro
       - ${BORG_PATH}:/mnt/borg-repository
       - ./backup/config.yaml:/etc/borgmatic.d/config.yaml
       - ./backup/crontab.txt:/etc/borgmatic.d/crontab.txt
