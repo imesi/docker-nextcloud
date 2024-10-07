@@ -1,5 +1,5 @@
 # Borg Backup
-O compose inclui um container do _Borg Backup_ que roda periodicamente conforme o arquivo `./backup/crontab.txt` e salva os arquivos em um bind mount que aponta para `$BORG_PATH`. O diretório precisa existir e ter um repositório inicializado para que os backups funcionem. Para inicializar um repositório sem criptografia:
+O compose inclui um container do _Borg Backup_ que roda periodicamente conforme o arquivo `./backup/crontab.txt` e salva os volumes internos do docker em um bind mount que aponta para `$BORG_PATH`. **Não é feito backup dos arquivos do GCS**, mais detalhes abaixo. O diretório de destino `$BORG_PATH` precisa existir e ter um repositório inicializado para que os backups funcionem. Para inicializar um repositório sem criptografia:
 
 ```
 docker-compose exec backup borgmatic rcreate -e none
@@ -33,3 +33,7 @@ Assumindo que o backup foi montado em `/mnt/borg`, os arquivos mais relevantes f
   - `/mnt/borg/mnt/nextcloud_groupfolders`.
 
 Outras opções podem ser definidas no `backup/config.yaml`. Para uso de criptografia é possível definir a passphrase usando a variável `BORG_PASSPHRASE`.
+
+## Sobre os arquivos no GCS
+
+O uso do mount de _Rclone_ com o bind mount do _Docker_ não interage bem com o _Borg_. É possível eliminar esse problema usando o [plugin de _Rclone_ para _Docker_](https://rclone.org/docker/) , que permite criar um volume a partir de um _remote_ do _Rclone_, mas o desempenho não é satisfatório, pois o _Borg_ é pensando para um fonte local de arquivos e o mount interfere no funcionamento dele. O ideal é pensar em uma estratégia de backup separada que se adeque melhor ao funcionamento do _GCS_.
