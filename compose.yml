@@ -78,6 +78,7 @@ services:
     volumes:
       - nextcloud:/var/www/html:z
       - data:/var/www/data:z
+      - ${GROUPFOLDERS_PATH}:/var/www/data/__groupfolders:z
     entrypoint: /cron.sh
     environment:
       - NEXTCLOUD_DATA_DIR=/var/www/data
