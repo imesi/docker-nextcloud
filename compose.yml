@@ -78,6 +78,7 @@ services:
     volumes:
       - nextcloud:/var/www/html:z
       - data:/var/www/data:z
+      - ${GROUPFOLDERS_PATH}:/var/www/data/__groupfolders:z
     entrypoint: /cron.sh
     environment:
       - NEXTCLOUD_DATA_DIR=/var/www/data
@@ -117,7 +118,7 @@ services:
       - default
 
   collabora:
-    image: collabora/code:24.04.5.1.1
+    image: collabora/code:23.05.9.2.1
     restart: always
     ports:
       - 9980:9980
