@@ -79,9 +79,11 @@ services:
       - nextcloud:/var/www/html:z
       - data:/var/www/data:z
       - ${GROUPFOLDERS_PATH}:/var/www/data/__groupfolders:z
+      - ${CA_FILE}:/etc/ca.pem:ro
     entrypoint: /cron.sh
     environment:
       - NEXTCLOUD_DATA_DIR=/var/www/data
+      - LDAPTLS_CACERT=/etc/ca.pem
     depends_on:
       - db
       - redis
