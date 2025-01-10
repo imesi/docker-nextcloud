@@ -69,7 +69,6 @@ services:
     depends_on:
       - app
     networks:
-      - proxy-tier
       - default
 
   cron:
@@ -139,7 +138,6 @@ services:
       - traefik.enable=true
       - traefik.http.routers.collabora.tls.certresolver=le
     networks:
-      - proxy-tier
       - default
 
   backup:
