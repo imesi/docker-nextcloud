@@ -92,7 +92,7 @@ services:
     restart: always
     command:
       - --api.dashboard=true
-      - --providers.docker.network=proxy-tier
+      - --providers.docker.network=proxy
       - --providers.docker.exposedbydefault=false
       - --entryPoints.web.address=:80
       - --entryPoints.web.http.redirections.entryPoint.to=websecure
@@ -117,7 +117,7 @@ services:
       - traefik.http.routers.traefik.middlewares=auth_user
       - traefik.http.middlewares.auth_user.basicauth.users=${TRAEFIK_ADMIN}
     networks:
-      - proxy-tier
+      - proxy
       - default
 
   collabora:
@@ -194,4 +194,4 @@ networks:
     ipam:
       config:
         - subnet: "172.29.0.0/16"
-  proxy-tier:
+  proxy:
