@@ -45,7 +45,7 @@ services:
       - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
       - MAIL_DOMAIN=${MAIL_DOMAIN}
       - PHP_UPLOAD_LIMIT=${PHP_UPLOAD_LIMIT}
-      - TRUSTED_PROXIES=172.29.0.2/16
+      - TRUSTED_PROXIES=172.29.0.0/16
       - LDAPTLS_CACERT=/etc/ca.pem
       - LDAP_BASE_DN=${LDAP_BASE_DN}
       - LDAP_USER=${LDAP_USER}
@@ -97,9 +97,11 @@ services:
       - --entryPoints.web.address=:80
       - --entryPoints.web.http.redirections.entryPoint.to=websecure
       - --entryPoints.websecure.address=:443
+        #      - --entrypoints.websecure.forwardedHeaders.trustedIPs=172.29.0.0/16
       - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
       - --certificatesresolvers.le.acme.email=${ADMIN_EMAIL}
       - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --accesslog=true
     ports:
       - 80:80
       - 443:443
@@ -188,7 +190,8 @@ volumes:
   backup:
 
 networks:
-  proxy-tier:
+  default:
     ipam:
       config:
         - subnet: "172.29.0.0/16"
+  proxy-tier:
