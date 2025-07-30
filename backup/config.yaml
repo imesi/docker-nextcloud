@@ -5,13 +5,13 @@ source_directories:
 
 repositories:
   - path: /mnt/borg-repository
-    one_file_system: true
 
+one_file_system: true
+read_special: true
 compression: lz4
 archive_name_format: 'backup-{now}'
 
 keep_daily: 7
-
 checks:
  - name: repository
    frequency: 2 weeks
@@ -27,18 +27,46 @@ mariadb_databases:
     hostname: db
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
+    tls: false
 
-before_backup:
-  - echo "Starting a backup job."
-after_backup:
-  - echo "Backup created."
-before_everything:
-  - echo "Enabling maintenance mode"
-  - echo "<?php \$CONFIG = array('maintenance' => true);" > /mnt/nextcloud_nextcloud/config/maintenance.config.php
-  - echo "Starting backups."
-after_everything:
-  - echo "Backups created."
-  - echo "Disabling maintenance mode"
-  - rm /mnt/nextcloud_nextcloud/config/maintenance.config.php
-on_error:
-  - echo "Error while creating a backup."
+commands:
+  - before: action
+    when:
+      - create
+    run:
+      - echo "Starting a backup job."
+
+  - after: action
+    when:
+      - create
+    run:
+      - echo "Backup created."
+    states:
+      - finish
+
+  - after: action
+    when:
+      - create
+      - prune
+      - compact
+      - check
+    run:
+      - echo "Error while creating a backup."
+    states:
+      - fail
+
+  - before: everything
+    when:
+      - create
+    run:
+      - echo "Enabling maintenance mode"
+      - echo "<?php \$CONFIG = array('maintenance' => true);" > /mnt/nextcloud_nextcloud/config/maintenance.config.php
+      - echo "Starting backups."
+
+  - after: everything
+    when:
+      - create
+    run:
+      - echo "Backups created."
+      - echo "Disabling maintenance mode"
+      - rm /mnt/nextcloud_nextcloud/config/maintenance.config.php

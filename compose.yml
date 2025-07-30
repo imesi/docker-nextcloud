@@ -157,7 +157,7 @@ services:
       - default
 
   backup:
-    image: ghcr.io/borgmatic-collective/borgmatic:1.9.12
+    image: b3vis/borgmatic:2.0
     restart: always
     volumes:
       - data:/mnt/nextcloud_data:ro
@@ -176,7 +176,7 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
   restore:
-    image: ghcr.io/borgmatic-collective/borgmatic:1.9.12
+    image: b3vis/borgmatic:2.0
     restart: always
     volumes:
       - ${BORG_PATH}:/mnt/borg-repository
